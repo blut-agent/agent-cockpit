@@ -1,0 +1,115 @@
+{
+  "name": "agent-cockpit",
+  "displayName": "Agent Cockpit",
+  "description": "Unified developer dashboard — code quality, AI review, agent context, and CI status",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "agent-cockpit-sidebar",
+          "title": "Agent Cockpit",
+          "icon": "$(dashboard)"
+        }
+      ]
+    },
+    "views": {
+      "agent-cockpit-sidebar": [
+        {
+          "type": "webview",
+          "id": "agent-cockpit.agentContext",
+          "name": "Agent Context"
+        },
+        {
+          "type": "webview",
+          "id": "agent-cockpit.aiReview",
+          "name": "AI Review"
+        },
+        {
+          "type": "webview",
+          "id": "agent-cockpit.codeQuality",
+          "name": "Code Quality"
+        },
+        {
+          "type": "webview",
+          "id": "agent-cockpit.ciStatus",
+          "name": "CI Status"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "agent-cockpit.refreshAgentContext",
+        "title": "Refresh Agent Context",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "agent-cockpit.reviewCurrentFile",
+        "title": "Review Current File",
+        "icon": "$(comment)"
+      },
+      {
+        "command": "agent-cockpit.reviewStagedDiff",
+        "title": "Review Staged Diff",
+        "icon": "$(diff)"
+      }
+    ],
+    "configuration": {
+      "title": "Agent Cockpit",
+      "properties": {
+        "agentCockpit.gatewayUrl": {
+          "type": "string",
+          "default": "https://hermes.<domain>.com",
+          "description": "Hermes agent gateway URL"
+        },
+        "agentCockpit.wikiPath": {
+          "type": "string",
+          "default": "~/.hermes/wiki",
+          "description": "Path to Hermes wiki directory"
+        },
+        "agentCockpit.contributionsFile": {
+          "type": "string",
+          "default": "~/.hermes/wiki/reports/contributions.md",
+          "description": "Path to contributions.md for tracking open PRs"
+        },
+        "agentCockpit.heartbeatFile": {
+          "type": "string",
+          "default": "~/.hermes/wiki/reports/heartbeat.md",
+          "description": "Path to heartbeat status file"
+        },
+        "agentCockpit.lessonsFile": {
+          "type": "string",
+          "default": "~/.hermes/wiki/mistakes.md",
+          "description": "Path to lessons learned (mistakes.md)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "18.x",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3",
+    "@vscode/test-cli": "^0.0.9",
+    "@vscode/test-electron": "^2.3.9"
+  }
+}
