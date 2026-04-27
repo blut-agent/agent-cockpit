@@ -1,8 +1,11 @@
 import * as vscode from 'vscode';
 import { AgentContextWebviewProvider } from './agentContextProvider';
+import { AiReviewWebviewProvider } from './aiReviewProvider';
+import { CodeQualityWebviewProvider } from './codeQualityProvider';
+import { CiStatusWebviewProvider } from './ciStatusProvider';
 
 export function activate(context: vscode.ExtensionContext) {
-	// Register Agent Context webview panel
+	// === Panel 1: Agent Context ===
 	const agentContextProvider = new AgentContextWebviewProvider(context.extensionUri);
 	
 	context.subscriptions.push(
@@ -12,11 +15,20 @@ export function activate(context: vscode.ExtensionContext) {
 		)
 	);
 
-	// Register commands
 	context.subscriptions.push(
 		vscode.commands.registerCommand('agent-cockpit.refreshAgentContext', () => {
 			agentContextProvider.refresh();
 		})
+	);
+
+	// === Panel 2: AI Review ===
+	const aiReviewProvider = new AiReviewWebviewProvider(context.extensionUri);
+	
+	context.subscriptions.push(
+		vscode.window.registerWebviewViewProvider(
+			'agent-cockpit.aiReview',
+			aiReviewProvider
+		)
 	);
 
 	context.subscriptions.push(
@@ -36,7 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
 				cancellable: false
 			}, async (progress) => {
 				try {
-					const result = await agentContextProvider.sendToGateway({
+					const result = await aiReviewProvider.sendToGateway({
 						prompt: `Review the following file for quality, security, and best practices. Provide inline feedback.\n\nFile: ${uri.fsPath}\n\n\`\`\`\n${content}\n\`\`\``,
 						skill: 'code-reviewer',
 						context: ''
@@ -61,7 +73,7 @@ export function activate(context: vscode.ExtensionContext) {
 					return;
 				}
 
-				const result = await agentContextProvider.sendToGateway({
+				const result = await aiReviewProvider.sendToGateway({
 					prompt: `Review the following staged diff for quality, security, and best practices.\n\n\`\`\`\n${diff}\n\`\`\``,
 					skill: 'code-reviewer',
 					context: ''
@@ -71,6 +83,44 @@ export function activate(context: vscode.ExtensionContext) {
 			} catch (error) {
 				vscode.window.showErrorMessage(`Failed to get staged diff: ${error instanceof Error ? error.message : String(error)}`);
 			}
+		})
+	);
+
+	// === Panel 3: Code Quality ===
+	const codeQualityProvider = new CodeQualityWebviewProvider(context.extensionUri);
+	
+	context.subscriptions.push(
+		vscode.window.registerWebviewViewProvider(
+			'agent-cockpit.codeQuality',
+			codeQualityProvider
+		)
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('agent-cockpit.runSonarScan', () => {
+			codeQualityProvider.runSonarScan();
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('agent-cockpit.scanCurrentFile', () => {
+			codeQualityProvider.scanCurrentFile();
+		})
+	);
+
+	// === Panel 4: CI Status ===
+	const ciStatusProvider = new CiStatusWebviewProvider(context.extensionUri);
+	
+	context.subscriptions.push(
+		vscode.window.registerWebviewViewProvider(
+			'agent-cockpit.ciStatus',
+			ciStatusProvider
+		)
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('agent-cockpit.refreshCiStatus', () => {
+			ciStatusProvider.refresh();
 		})
 	);
 }
